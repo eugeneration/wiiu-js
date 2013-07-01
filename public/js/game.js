@@ -33,5 +33,14 @@ $(function() {
     $("#gyro-data-z").text(gyroZ);
     // o.x, o.y, o.z for accelerometer
     // o.alpha, o.beta, o.gamma for gyro
+
+    // start sending messages
+    socket.emit('accel-data', {'gyroX': gyroX, 'gyroY': gyroY, 'gyroZ': gyroZ});
+  });
+
+  $("body").css('background-color', 'white');
+  // the client noticed the phone was tilted up
+  socket.on('orientation-up', function(data) {
+    $("body").css('background-color', 'red');
   });
 });

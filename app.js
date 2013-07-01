@@ -28,7 +28,20 @@ var clients = {};
 
 io.sockets.on('connection', function (socket) {
   socket.emit('news', { hello: 'world' });
+
+  // currently unused signal for initial connection data
   socket.on('registration', function (data) {
     console.log(data);
+  }); 
+  
+  // signal sent VERY FREQUENTLY for accelerometer data
+  socket.on('accel-data', function(data) {
+    var gyroX = data.gyroX;
+    var gyroY = data.gyroY;
+    var gyroZ = data.gyroZ;
+    
+    if (gyroY >= 80) {
+      socket.emit('orientation-up');
+    }
   });
 });
