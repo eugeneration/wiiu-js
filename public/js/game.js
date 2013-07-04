@@ -72,6 +72,7 @@ $(function() {
   socket.on('orientation', function(data) {
     $('body').css('background-color', shadeColor("888888", data));
   });
+    $("body").css('background-color', 'red');
 
   // the client noticed the phone was tilted up
   socket.on('orientation-up', function(data) {
