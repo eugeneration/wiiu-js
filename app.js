@@ -44,5 +44,8 @@ io.sockets.on('connection', function (socket) {
       console.log("AH MAH GAHD, MAH ORIENTATION IS LIKE, UP-ULAR!");
       socket.emit('orientation-up');
     }
+    else {
+      socket.emit("orientation-default");
+    }
   });
 });
