@@ -1,4 +1,4 @@
-var socket = io.connect('http://localhost');
+var socket = io.connect();
 
 $(function() {
   // make the send a random signal button do something
