@@ -40,12 +40,16 @@ io.sockets.on('connection', function (socket) {
     var gyroY = data.gyroY;
     var gyroZ = data.gyroZ;
     
-    if (gyroY >= 80) {
+    if(gyroY != 0) {
+      socket.emit('orientation', gyroY);
+    }
+
+    /*if (gyroY >= 80) {
       console.log("AH MAH GAHD, MAH ORIENTATION IS LIKE, UP-ULAR!");
       socket.emit('orientation-up');
     }
     else {
       socket.emit("orientation-default");
-    }
+    }*/
   });
 });
