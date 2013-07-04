@@ -38,7 +38,7 @@ $(function() {
     socket.emit('accel-data', {'gyroX': gyroX, 'gyroY': gyroY, 'gyroZ': gyroZ});
   });
 
-  $("body").css('background-color', 'white');
+  $("body").css('background-color', 'blue');
   // the client noticed the phone was tilted up
   socket.on('orientation-up', function(data) {
     $("body").css('background-color', 'red');
