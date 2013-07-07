@@ -23,6 +23,7 @@ $(function() {
 
   // if true, this device has gyros and accelerometers usable by HTML5
   var isController = gyro.hasFeature('devicemotion');
+//  isController=true;
   socket.emit('registration', isController);
   
   /************************************************************************
@@ -73,26 +74,24 @@ $(function() {
   
     function addScreen(id) {
       screenCount++;
-      $("#screen-number").text("There are " + screenCount + " controllers.");
+      $("#screen-number").text("There are " + screenCount + " screens.");
     }
     function removeScreen(id) {
       screenCount--;
-      $("#screen-number").text("There are " + screenCount + " controllers.");
+      $("#screen-number").text("There are " + screenCount + " screens.");
     }
     // whenever a screen registers, get it's id
-    socket.on('new-screen', function(screen) {
-      addScreen(screen.id);
+    socket.on('new-screen', function(screenId) {
+      addScreen(screenId);
     });
     // whenever a screen registers, get it's id
-    socket.on('remove-screen', function(screen) {
-      removeScreen(screen.id);
+    socket.on('remove-screen', function(screenId) {
+      removeScreen(screenId);
     });
     // on successful register, get starting data
-    socket.on('registration-successful', function(screens) {
-      for (var id in screens) {
-        if (screens.hasOwnProperty(id)) {
-          addScreen(id);
-        }
+    socket.on('registration-successful', function(screenIds) {
+      for (var i = 0; i < screenIds.length; i++) {
+        addScreen(screenIds[i]);
       }
     });
   }
@@ -127,10 +126,10 @@ $(function() {
       socket.emit('accel-data', {'gyroX': gyroX, 'gyroY': gyroY, 'gyroZ': gyroZ});
     });
     
-      // steady stream of orientation data
-      socket.on('orientation', function(data) {
-        $('body').css('background-color', shadeColor("888888", data));
-      });
+    // steady stream of orientation data
+    socket.on('orientation', function(data) {
+      $('body').css('background-color', shadeColor("888888", data));
+    });
   
   
   
@@ -181,24 +180,23 @@ $(function() {
       controllerCount--;
       removeControllerDom();
     }
+  
     // whenever a screen registers, get it's id
-    socket.on('new-controller', function(controller) {
+    socket.on('new-controller', function(controllerId) {
       console.log("A wild screen has appeared!");
-      addController(controller.id);
+      addController(controllerId);
     });
     // whenever a screen disconnects, remove it
-    socket.on('remove-controller', function(controller) {
+    socket.on('remove-controller', function(controllerId) {
       console.log("A screen has run away!");
-      removeController(controller.id);
+      removeController(controllerId);
     });
     // on successful register, get starting data
-    socket.on('registration-successful', function(controllers) {
-      for (var id in controllers) {
-        if (controllers.hasOwnProperty(id)) {
-          addController(id);
-        }
+    socket.on('registration-successful', function(controllerIds) {
+      for (var i = 0; i < controllerIds.length; i++) {
+        addScreen(controllerIds[i]);
       }
-      console.log("There are " + controllerCount + " screens.");
+      console.log("There are " + controllerIds.length + " controllers.");
     });
   }
 });

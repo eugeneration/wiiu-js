@@ -42,12 +42,12 @@ io.sockets.on('connection', function (socket) {
     if (isController !== null) {
       if (isController) {
         // notify all the screens
-        broadcastToAllScreens('remove-controller', socket);
+        broadcastToAllScreens('remove-controller', socket.id);
         delete controllers[socket.id];
       }
       else {
         // notify all the controllers
-        broadcastToAllControllers('remove-screen', socket);
+        broadcastToAllControllers('remove-screen', socket.id);
         delete screens[socket.id];
       }
     }
@@ -57,20 +57,32 @@ io.sockets.on('connection', function (socket) {
   socket.on('registration', function (data) {
     isController = data;
     if (isController) {
-      // add a new controller to the list
+      // add to the list of controllers a new controller
       controllers[socket.id] = socket;
-      // send the list of screens to the controller
-      socket.emit('registration-successful', screens);
-      // notify all the screens
-      broadcastToAllScreens('new-controller', socket);
+      // send the list of existing screens to the new controller
+      var screenIdArray = [];
+      for(var id in screens) {
+        if (screens.hasOwnProperty(id)) {
+          screenIdArray.push(id);
+        }
+      }
+      socket.emit('registration-successful', screenIdArray);
+      // broadcast to all the existing screens that a new controller arrived
+      broadcastToAllScreens('new-controller', socket.id);
     }
     else {
-      // add a new screen to the list
+      // add to the list of screens the new screen
       screens[socket.id] = socket;
-      // send the list of controllers to the screen
-      socket.emit('registration-successful', controllers);
-      // notify all the controllers
-      broadcastToAllControllers('new-screen', socket);
+      // send the list of existing controllers to the new screen
+      var controllerIdArray = [];
+      for(var id in controllers) {
+        if (controllers.hasOwnProperty(id)) {
+          controllerIdArray.push(id);
+        }
+      }
+      socket.emit('registration-successful', controllerIdArray);
+      // broadcast to all the existing controllers that a new screen arrived
+      broadcastToAllControllers('new-screen', socket.id);
     }
     console.log("This device is a controller? " + data);
   });
