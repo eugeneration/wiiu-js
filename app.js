@@ -23,17 +23,56 @@ app.configure(function() {
   app.use(express.static(__dirname + "/public", { maxAge:oneDay }));
 });
 
-// the connection stuff
-var clients = {};
+
+
+
+var clients = {},
+    controllers = {},
+    screens = {};
+var isController = null;
 
 io.sockets.on('connection', function (socket) {
-  socket.emit('news', { hello: 'world' });
-
-  // currently unused signal for initial connection data
-  socket.on('registration', function (data) {
-    console.log(data);
-  }); 
+              
+  // On connection
+  var hs = socket.handshake;
+  clients[socket.id] = socket;
   
+  socket.on('disconnect', function () {
+    delete clients[socket.id]; // remove the client from the array
+    if (isController !== null) {
+      if (isController) { delete controllers[socket.id]; }
+      else              { delete screens[socket.id];     }
+    }
+  });
+              
+  // puts the person in the controllers/screens object
+  socket.on('registration', function (data) {
+    isController = data;
+    if (isController) { controllers[socket.id] = socket; }
+    else              { screens[socket.id] = socket;     }
+    console.log("This device is a controller? " + data);
+  });
+              
+  /************************************************************************
+   *
+   * HELPERS
+   *
+   ************************************************************************/
+  function broadcastToAllScreens (messageTitle, data) {
+    $.each(screens, function(id, client) {
+      client.emit(messageTitle, data);
+    });
+  }
+  function broadcastToAllControllers (messageTitle, data) {
+    $.each(controllers, function(id, client) {
+      client.emit(messageTitle, data);
+    });
+  }
+  /************************************************************************
+   *
+   * SIGNALS SENT BY CONTROLLER - BLUE
+   *
+   ************************************************************************/
   // signal sent VERY FREQUENTLY for accelerometer data
   socket.on('accel-data', function(data) {
     var gyroX = data.gyroX;
@@ -41,15 +80,14 @@ io.sockets.on('connection', function (socket) {
     var gyroZ = data.gyroZ;
     
     if(gyroY != 0) {
-      socket.emit('orientation', gyroY);
+      
+      broadcastToAllScreens('orientation', gyroY);
     }
-
-    /*if (gyroY >= 80) {
-      console.log("AH MAH GAHD, MAH ORIENTATION IS LIKE, UP-ULAR!");
-      socket.emit('orientation-up');
-    }
-    else {
-      socket.emit("orientation-default");
-    }*/
   });
+              
+  /************************************************************************
+   *
+   * SIGNALS SENT BY SCREEN - RED
+   *
+   ************************************************************************/
 });
