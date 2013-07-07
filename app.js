@@ -59,14 +59,18 @@ io.sockets.on('connection', function (socket) {
    *
    ************************************************************************/
   function broadcastToAllScreens (messageTitle, data) {
-    $.each(screens, function(id, client) {
-      client.emit(messageTitle, data);
-    });
+    for(var id in screens) {
+      if (screens.hasOwnProperty(id)) {
+        screens[id].emit(messageTitle, data);
+      }
+    }
   }
   function broadcastToAllControllers (messageTitle, data) {
-    $.each(controllers, function(id, client) {
-      client.emit(messageTitle, data);
-    });
+    for(var id in controlllers) {
+      if (controllers.hasOwnProperty(id)) {
+        controllers[id].emit(messageTitle, data);
+      }
+    }
   }
   /************************************************************************
    *
@@ -79,10 +83,7 @@ io.sockets.on('connection', function (socket) {
     var gyroY = data.gyroY;
     var gyroZ = data.gyroZ;
     
-    if(gyroY != 0) {
-      
-      broadcastToAllScreens('orientation', gyroY);
-    }
+    broadcastToAllScreens('orientation', gyroY);
   });
               
   /************************************************************************
