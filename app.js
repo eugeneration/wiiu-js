@@ -41,12 +41,12 @@ io.sockets.on('connection', function (socket) {
     delete clients[socket.id]; // remove the client from the array
     if (isController !== null) {
       if (isController) {
-        // notify all the screens
+        // notify all the screens this controller needs to be removed
         broadcastToAllScreens('remove-controller', socket.id);
         delete controllers[socket.id];
       }
       else {
-        // notify all the controllers
+        // notify all the controllers this screen needs to be removed
         broadcastToAllControllers('remove-screen', socket.id);
         delete screens[socket.id];
       }
@@ -66,7 +66,7 @@ io.sockets.on('connection', function (socket) {
           screenIdArray.push(id);
         }
       }
-      socket.emit('registration-successful', screenIdArray);
+      socket.emit('registered-as-controller', screenIdArray);
       // broadcast to all the existing screens that a new controller arrived
       broadcastToAllScreens('new-controller', socket.id);
     }
@@ -80,7 +80,7 @@ io.sockets.on('connection', function (socket) {
           controllerIdArray.push(id);
         }
       }
-      socket.emit('registration-successful', controllerIdArray);
+      socket.emit('registered-as-screen', controllerIdArray);
       // broadcast to all the existing controllers that a new screen arrived
       broadcastToAllControllers('new-screen', socket.id);
     }
@@ -117,7 +117,10 @@ io.sockets.on('connection', function (socket) {
     var gyroY = data.gyroY;
     var gyroZ = data.gyroZ;
     
-    broadcastToAllScreens('orientation', gyroY);
+    broadcastToAllScreens('orientation', {
+                          "id" : socket.id,
+                          "gyroY" : gyroY
+                          });
   });
               
   /************************************************************************

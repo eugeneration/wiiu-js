@@ -23,7 +23,7 @@ $(function() {
 
   // if true, this device has gyros and accelerometers usable by HTML5
   var isController = gyro.hasFeature('devicemotion');
-//  isController=true;
+  //isController=true;
   socket.emit('registration', isController);
   
   /************************************************************************
@@ -89,7 +89,7 @@ $(function() {
       removeScreen(screenId);
     });
     // on successful register, get starting data
-    socket.on('registration-successful', function(screenIds) {
+    socket.on('registered-as-controller', function(screenIds) {
       for (var i = 0; i < screenIds.length; i++) {
         addScreen(screenIds[i]);
       }
@@ -128,7 +128,7 @@ $(function() {
     
     // steady stream of orientation data
     socket.on('orientation', function(data) {
-      $('body').css('background-color', shadeColor("888888", data));
+      $("#controllers ." + data.id).css('background-color', shadeColor("888888", data.gyroY));
     });
   
   
@@ -138,23 +138,10 @@ $(function() {
   
     var controllerCount = 0;
   
-    $("#controllers").find("li").click(function() {
-      $(this).animate({
-        opacity     : 0
-      }, 500).animate({
-        width       : 0,
-        margin      : 0,
-        borderWidth	: 0
-      }, 500, function() {
-        $(this).remove();
-      });
-    })
-  
     function addControllerDom(id) {
-      $("<li class=\""+ id + "\">C</li>").appendTo("#controllers")
+      $("<li class=\""+ id + "\"></li>").appendTo("#controllers")
       .animate({ opacity     : 100 }, 500)
-      .animate({ width       : 200,
-                 margin      : 50,
+      .animate({ width       : 150,
                  borderWidth	: 0 }, 500,
       function() {
         // stuff that happens after the animate
@@ -174,11 +161,11 @@ $(function() {
   
     function addController(id) {
       controllerCount++;
-      addControllerDom();
+      addControllerDom(id);
     }
     function removeController(id) {
       controllerCount--;
-      removeControllerDom();
+      removeControllerDom(id);
     }
   
     // whenever a screen registers, get it's id
@@ -192,9 +179,9 @@ $(function() {
       removeController(controllerId);
     });
     // on successful register, get starting data
-    socket.on('registration-successful', function(controllerIds) {
+    socket.on('registered-as-screen', function(controllerIds) {
       for (var i = 0; i < controllerIds.length; i++) {
-        addScreen(controllerIds[i]);
+        addController(controllerIds[i]);
       }
       console.log("There are " + controllerIds.length + " controllers.");
     });
