@@ -1,4 +1,5 @@
 var socket = io.connect();
+console.log("v1.0");
 
 $(function() {
   
@@ -22,7 +23,8 @@ $(function() {
 
   // if true, this device has gyros and accelerometers usable by HTML5
   var isController = gyro.hasFeature('devicemotion');
-  
+  console.log(gyro.getFeatures());
+  $('body').append(gyro.getFeatures());
   socket.emit('registration', isController);
   
   /************************************************************************
