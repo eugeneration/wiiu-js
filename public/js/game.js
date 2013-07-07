@@ -23,8 +23,6 @@ $(function() {
 
   // if true, this device has gyros and accelerometers usable by HTML5
   var isController = gyro.hasFeature('devicemotion');
-  console.log(gyro.getFeatures());
-  $('body').append(gyro.getFeatures());
   socket.emit('registration', isController);
   
   /************************************************************************
@@ -33,7 +31,7 @@ $(function() {
    *
    ************************************************************************/
   if (isController) {
-    $("body").css('background-color', 'blue');
+    $("body").css('background-color', 'rgb(211, 255, 255)');
   
     var accelX, 
         accelY, 
@@ -107,8 +105,7 @@ $(function() {
   
   else {
   
-    $("body").css('background-color', 'red');
-  
+    $("body").css('background-color', 'rgb(255, 211, 211)');
   
     // make the send a random signal button do something
     $('#send-random-signal').click(function () {
@@ -139,7 +136,9 @@ $(function() {
   
     //////////////////////////////////////////////////////////
     // controller data maintainance
-    
+  
+    var controllerCount = 0;
+  
     $("#controllers").find("li").click(function() {
       $(this).animate({
         opacity     : 0
@@ -184,10 +183,12 @@ $(function() {
     }
     // whenever a screen registers, get it's id
     socket.on('new-controller', function(controller) {
+      console.log("A wild screen has appeared!");
       addController(controller.id);
     });
     // whenever a screen disconnects, remove it
     socket.on('remove-controller', function(controller) {
+      console.log("A screen has run away!");
       removeController(controller.id);
     });
     // on successful register, get starting data
@@ -197,6 +198,7 @@ $(function() {
           addController(id);
         }
       }
+      console.log("There are " + controllerCount + " screens.");
     });
   }
 });
