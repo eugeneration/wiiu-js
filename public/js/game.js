@@ -64,8 +64,39 @@ $(function() {
       socket.emit('accel-data', {'gyroX': gyroX, 'gyroY': gyroY, 'gyroZ': gyroZ});
       
     });
+  
+  
+  //////////////////////////////////////////////////////////
+  // screen data maintainance
+  
+    var screenCount = 0;
+  
+    function addScreen(id) {
+      screenCount++;
+      $("#screen-number").text("There are " + screenCount + " controllers.");
+    }
+    function removeScreen(id) {
+      screenCount--;
+      $("#screen-number").text("There are " + screenCount + " controllers.");
+    }
+    // whenever a screen registers, get it's id
+    socket.on('new-screen', function(screen) {
+      addScreen(screen.id);
+    });
+    // whenever a screen registers, get it's id
+    socket.on('remove-screen', function(screen) {
+      removeScreen(screen.id);
+    });
+    // on successful register, get starting data
+    socket.on('registration-successful', function(screens) {
+      for (var id in screens) {
+        if (screens.hasOwnProperty(id)) {
+          addScreen(id);
+        }
+      }
+    });
   }
-      
+  
   /************************************************************************
    *
    * SCREEN - RED
@@ -73,32 +104,97 @@ $(function() {
    ************************************************************************/
   
   else {
+  
     $("body").css('background-color', 'red');
   
   
-  // make the send a random signal button do something
-  $('#send-random-signal').click(function () {
-    accelX = 0;
-    accelY = 0;
-    accelZ = 0;
-    gyroX  = 0;
-    gyroY  = Math.floor(Math.random() * 180) - 90;
-    gyroZ  = 0;
-//    this stuff won't exist for screens in a short while
-//    $("#accel-data-x").text(accelX);
-//    $("#accel-data-y").text(accelY);
-//    $("#accel-data-z").text(accelZ);
-//    $("#gyro-data-x").text(gyroX);
-//    $("#gyro-data-y").text(gyroY);
-//    $("#gyro-data-z").text(gyroZ);
+    // make the send a random signal button do something
+    $('#send-random-signal').click(function () {
+      accelX = 0;
+      accelY = 0;
+      accelZ = 0;
+      gyroX  = 0;
+      gyroY  = Math.floor(Math.random() * 180) - 90;
+      gyroZ  = 0;
+  //    this stuff won't exist for screens in a short while
+  //    $("#accel-data-x").text(accelX);
+  //    $("#accel-data-y").text(accelY);
+  //    $("#accel-data-z").text(accelZ);
+  //    $("#gyro-data-x").text(gyroX);
+  //    $("#gyro-data-y").text(gyroY);
+  //    $("#gyro-data-z").text(gyroZ);
 
-    // start sending messages
-    socket.emit('accel-data', {'gyroX': gyroX, 'gyroY': gyroY, 'gyroZ': gyroZ});
-  });
+      // start sending messages
+      socket.emit('accel-data', {'gyroX': gyroX, 'gyroY': gyroY, 'gyroZ': gyroZ});
+    });
+    
+      // steady stream of orientation data
+      socket.on('orientation', function(data) {
+        $('body').css('background-color', shadeColor("888888", data));
+      });
   
-    // steady stream of orientation data
-    socket.on('orientation', function(data) {
-      $('body').css('background-color', shadeColor("888888", data));
+  
+  
+    //////////////////////////////////////////////////////////
+    // controller data maintainance
+    
+    $("#controllers").find("li").click(function() {
+      $(this).animate({
+        opacity     : 0
+      }, 500).animate({
+        width       : 0,
+        margin      : 0,
+        borderWidth	: 0
+      }, 500, function() {
+        $(this).remove();
+      });
+    })
+  
+    function addControllerDom(id) {
+      $("<li class=\""+ id + "\">C</li>").appendTo("#controllers")
+      .animate({ opacity     : 100 }, 500)
+      .animate({ width       : 200,
+                 margin      : 50,
+                 borderWidth	: 0 }, 500,
+      function() {
+        // stuff that happens after the animate
+      });
+    }
+    function removeControllerDom(id) {
+      $("#controllers ." + id)
+        .animate({ opacity     : 0 }, 500)
+        .animate({ width       : 0,
+                  margin      : 0,
+                  borderWidth	: 0 }, 500,
+        function() {
+          // stuff that hapens after the animate
+          $(this).remove();
+        });
+    }
+  
+    function addController(id) {
+      controllerCount++;
+      addControllerDom();
+    }
+    function removeController(id) {
+      controllerCount--;
+      removeControllerDom();
+    }
+    // whenever a screen registers, get it's id
+    socket.on('new-controller', function(controller) {
+      addController(controller.id);
+    });
+    // whenever a screen disconnects, remove it
+    socket.on('remove-controller', function(controller) {
+      removeController(controller.id);
+    });
+    // on successful register, get starting data
+    socket.on('registration-successful', function(controllers) {
+      for (var id in controllers) {
+        if (controllers.hasOwnProperty(id)) {
+          addController(id);
+        }
+      }
     });
   }
 });
